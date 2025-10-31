@@ -1,99 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Animated GitHub Style Search Box</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Click-to-Expand Search Box</title>
   <style>
     body {
-      background-color: #0d1117;
+      background: linear-gradient(135deg, #0d1117, #1f2937);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       font-family: "Poppins", sans-serif;
-      color: white;
-      overflow: hidden;
     }
 
-    .search-form {
-      background-color: #161b22;
-      border: 2px solid #30363d;
-      border-radius: 50px;
+    .search-container {
+      position: relative;
       display: flex;
       align-items: center;
-      padding: 10px 14px;
-      width: 350px;
-      transition: 0.4s ease;
-      box-shadow: 0 0 0 rgba(88,166,255,0);
-      animation: glow 3s infinite alternate;
     }
 
-    @keyframes glow {
+    /* 🔍 Search button */
+    .search-btn {
+      background: #58a6ff;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      transition: all 0.4s ease;
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+    }
+
+    .search-btn:hover {
+      background: #1f6feb;
+      transform: scale(1.1) rotate(10deg);
+    }
+
+    /* 🔍 Input field (hidden by default) */
+    .search-box {
+      width: 0;
+      opacity: 0;
+      padding: 12px 15px;
+      border: none;
+      border-radius: 25px;
+      outline: none;
+      background: #161b22;
+      color: #fff;
+      font-size: 16px;
+      margin-left: 10px;
+      transition: all 0.5s ease;
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+    }
+
+    /* When active (expanded) */
+    .active {
+      width: 250px;
+      opacity: 1;
+      box-shadow: 0 0 20px #58a6ff, 0 0 40px rgba(88,166,255,0.4);
+    }
+
+    /* Floating emoji */
+    .emoji {
+      position: absolute;
+      font-size: 22px;
+      animation: floatUp 1.5s ease-out forwards;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    @keyframes floatUp {
       0% {
-        box-shadow: 0 0 5px rgba(88,166,255,0.3);
+        transform: translateY(0) scale(1);
+        opacity: 1;
       }
       100% {
-        box-shadow: 0 0 15px rgba(88,166,255,0.7);
+        transform: translateY(-100px) scale(1.5);
+        opacity: 0;
       }
-    }
-
-    .search-icon {
-      margin-right: 10px;
-      color: #8b949e;
-      font-size: 20px;
-      transition: transform 0.4s ease;
-    }
-
-    .search-form:hover .search-icon {
-      transform: rotate(360deg);
-      color: #58a6ff;
-    }
-
-    .search-form input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #c9d1d9;
-      font-size: 16px;
-      padding: 6px;
-      transition: all 0.3s ease;
-    }
-
-    .search-form input:focus {
-      color: #fff;
-    }
-
-    .search-form button {
-      background: linear-gradient(135deg, #238636, #2ea043);
-      border: none;
-      color: white;
-      padding: 8px 14px;
-      border-radius: 50px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 600;
-      transition: all 0.4s ease;
-      box-shadow: 0 0 5px rgba(35,134,54,0.3);
-    }
-
-    .search-form button:hover {
-      background: linear-gradient(135deg, #2ea043, #3fb950);
-      transform: scale(1.1);
-      box-shadow: 0 0 15px rgba(63,185,80,0.6);
     }
   </style>
 </head>
 <body>
 
-  <!-- Replace YOUR_FORM_ID with your Formspree ID -->
-  <form class="search-form" action="https://formspree.io/f/mvgvkblb" method="POST">
-    <span class="search-icon">🔍</span>
-    <input type="text" name="search_query" placeholder="Type to search..." required />
-    <button type="submit">Send 🚀</button>
-  </form>
+  <div class="search-container">
+    <button class="search-btn" id="searchBtn">🔍</button>
+    <form action="https://formspree.io/f/mpwoyoke" method="POST">
+      <input type="text" id="searchBox" class="search-box" name="search_query" placeholder="Type and press Enter..." required>
+    </form>
+  </div>
+
+  <script>
+    const btn = document.getElementById("searchBtn");
+    const input = document.getElementById("searchBox");
+    const emojis = ["✨", "🔥", "💡", "🚀", "🎉", "🌈", "⚡"];
+
+    // Toggle search bar open/close
+    btn.addEventListener("click", () => {
+      input.classList.toggle("active");
+      if (input.classList.contains("active")) {
+        input.focus();
+      } else {
+        input.blur();
+      }
+    });
+
+    // Close if clicked outside
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".search-container")) {
+        input.classList.remove("active");
+      }
+    });
+
+    // Floating emoji effect while typing
+    input.addEventListener("input", () => {
+      if (!input.classList.contains("active")) return;
+      const emoji = document.createElement("span");
+      emoji.classList.add("emoji");
+      emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      const rect = input.getBoundingClientRect();
+      emoji.style.left = rect.left + Math.random() * rect.width + "px";
+      emoji.style.top = rect.top + window.scrollY - 10 + "px";
+      document.body.appendChild(emoji);
+      setTimeout(() => emoji.remove(), 1500);
+    });
+  </script>
 
 </body>
 </html>
